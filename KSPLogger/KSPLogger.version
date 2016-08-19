@@ -1,6 +1,7 @@
 ﻿{
   "NAME": "KSPLogger",
   "URL": "http://ksp-avc.cybutek.net/version.php?id=333",
+  "DOWNLOAD": "https://github.com/linuxgurugamer/KSPLogger/releases",
   "VERSION": {
     "MAJOR": 0,
     "MINOR": 0,
