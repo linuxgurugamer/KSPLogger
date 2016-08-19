@@ -13,7 +13,7 @@ namespace KSPLogger
     {
         Config cfg = new Config();
 
-
+        float lastUpdate = 0.0f;
 
         string line = "";
         string filenames = "";
@@ -71,8 +71,15 @@ namespace KSPLogger
             cfg.LoadConfiguration();
         }
 
-        public void LateUpdate()
+        // use FixedUpdate since it is not called as often as Update or LateUpdate is, but 
+        // is still fast enough
+
+        public void FixedUpdate()
         {
+            if (Time.realtimeSinceStartup - lastUpdate < cfg.refreshRate)
+                return;
+            lastUpdate = Time.realtimeSinceStartup;
+
             filenames = "";
             // From FlightGlobals
             if (cfg.ship_geeForce)

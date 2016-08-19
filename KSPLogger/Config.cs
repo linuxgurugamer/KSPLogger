@@ -29,6 +29,7 @@ namespace KSPLogger
         public string separator = ",";
         public bool singleLine = true;
         public int decimalPlaces = 0;
+        public float refreshRate = 0.1f;
 
         // From FlightGlobals
 
@@ -70,6 +71,8 @@ namespace KSPLogger
             try { separator = root.GetValue("separator"); } catch { }
 
             try { singleLine = Boolean.Parse(root.GetValue("singleLine")); } catch { }
+            
+            try { refreshRate = (float)Convert.ToDouble(root.GetValue("refreshRate")); } catch (Exception) { }
 
             try { singleLine = Boolean.Parse(root.GetValue("singleLine")); } catch { }
             try { decimalPlaces = Convert.ToUInt16(root.GetValue("decimalPlaces")); } catch (Exception) { }
