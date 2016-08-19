@@ -18,3 +18,4 @@ mkdir %d%
 copy bin\Debug\KSPLogger.dll %H%\Gamedata\KSPLogger
 copy KSPLogger.cfg %H%\Gamedata\KSPLogger
 copy KSPLogger.version %H%\Gamedata\KSPLogger
+copy MiniAVC.dll %H%\Gamedata\KSPLogger

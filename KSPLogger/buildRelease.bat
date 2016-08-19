@@ -44,6 +44,7 @@ copy KSPLogger.cfg %HOMEDIR%\install\Gamedata\KSPLogger
 copy KSPLogger.version %HOMEDIR%\install\Gamedata\KSPLogger
 copy README.md %HOMEDIR%\install\Gamedata\KSPLogger
 copy ChangeLog.txt %HOMEDIR%\install\Gamedata\KSPLogger
+copy MiniAVC.dll %HOMEDIR%\install\Gamedata\KSPLogger
 pause
 
 %HOMEDRIVE%
