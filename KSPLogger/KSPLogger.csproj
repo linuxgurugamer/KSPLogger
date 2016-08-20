@@ -69,7 +69,6 @@
     <None Include="deploy.bat" />
     <None Include="KSPLogger.cfg" />
     <None Include="KSPLogger.version" />
-    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ChangeLog.txt" />

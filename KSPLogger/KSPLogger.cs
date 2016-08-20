@@ -14,6 +14,7 @@ namespace KSPLogger
         Config cfg = new Config();
 
         float lastUpdate = 0.0f;
+        float lastDcheckUpdate = 0.0f;
 
         string line = "";
         string filenames = "";
@@ -71,6 +72,35 @@ namespace KSPLogger
             cfg.LoadConfiguration();
         }
 
+        //
+        // Following copied from TheReadPanda's Hire mod with permission
+        //
+        int KDead = 0;
+        int KMissing = 0;
+        //private string[] KCareerStrings = { "Pilot", "Scientist", "Engineer" };
+
+        void dCheck()
+        {
+            KDead = 0;
+            KMissing = 0;
+            var roster = HighLogic.CurrentGame.CrewRoster;
+
+            // 10 percent for dead and 5 percent for missing, note can only have dead in some career modes.
+            foreach (ProtoCrewMember kerbal in roster.Crew)
+            {
+               
+                if (kerbal.rosterStatus.ToString() == "Dead")
+                {
+                    //if (KCareerStrings.Contains(kerbal.experienceTrait.Title))
+                        KDead++ ;                  
+                }
+                if (kerbal.rosterStatus.ToString() == "Missing")
+                {
+                    //if (KCareerStrings.Contains(kerbal.experienceTrait.Title))
+                        KMissing++;  
+                }
+            }
+        }
         // use FixedUpdate since it is not called as often as Update or LateUpdate is, but 
         // is still fast enough
 
@@ -78,6 +108,7 @@ namespace KSPLogger
         {
             if (Time.realtimeSinceStartup - lastUpdate < cfg.refreshRate)
                 return;
+
             lastUpdate = Time.realtimeSinceStartup;
 
             filenames = "";
@@ -129,7 +160,17 @@ namespace KSPLogger
             if (cfg.vesselName)
                 WriteFile("vesselName", FlightGlobals.ActiveVessel.vesselName);
 
+            // Only do the dCheck function once every 10 seconds
+            if ((cfg.KIA || cfg.MIA) && Time.realtimeSinceStartup - lastDcheckUpdate >= 10)
+            {
+                dCheck();
+                lastDcheckUpdate = Time.realtimeSinceStartup;            
 
+                if (cfg.KIA)
+                    WriteFile("KIA", KDead.ToString());
+                if (cfg.MIA)
+                    WriteFile("MIA", KDead.ToString());
+            }
         }
 
     }

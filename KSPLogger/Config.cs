@@ -60,6 +60,9 @@ namespace KSPLogger
         public bool speed = false;
         public bool vesselName = false;
 
+        public bool KIA = false;
+        public bool MIA = false;
+
         void parseConfigNode(ref ConfigNode root)
         {
             try { filePrefix = root.GetValue("filePrefix"); } catch { }
@@ -99,6 +102,9 @@ namespace KSPLogger
             try { obt_speed = Boolean.Parse(root.GetValue("obt_speed")); } catch { }
             try { heightFromSurface = Boolean.Parse(root.GetValue("heightFromSurface")); } catch { }
             try { vesselName = Boolean.Parse(root.GetValue("vesselName")); } catch { }
+
+            try { KIA = Boolean.Parse(root.GetValue("KIA")); } catch { }
+            try { MIA = Boolean.Parse(root.GetValue("MIA")); } catch { }
         }
 
 
