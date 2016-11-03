@@ -39,9 +39,11 @@ namespace KSPLogger
         public bool ship_obtSpeed = false;
         public bool ship_srfSpeed = false;
         public bool ship_verticalSpeed = false;
+        public bool verticalAcceleration = false;
 
         //fromFlightGlobals.ActiveVessel
         public bool altitude = false;
+        public bool terrainAltitude = false;
         public bool atmDensity = false;
         public bool atmosphericTemperature = false;
         public bool currentStage = false;
@@ -51,6 +53,7 @@ namespace KSPLogger
         public bool heightFromSurface = false;
         public bool heightFromTerrain = false;
         public bool horizontalSrfSpeed = false;
+        public bool horizontalAcceleration = false;
         public bool indicatedAirSpeed = false;
         public bool landedAt = false;
         public bool mach = false;
@@ -85,8 +88,10 @@ namespace KSPLogger
             try { ship_obtSpeed = Boolean.Parse(root.GetValue("ship_obtSpeed")); } catch { }
             try { ship_srfSpeed = Boolean.Parse(root.GetValue("ship_srfSpeed")); } catch { }
             try { ship_verticalSpeed = Boolean.Parse(root.GetValue("ship_verticalSpeed")); } catch { }
+            try { verticalAcceleration = Boolean.Parse(root.GetValue("verticalAcceleration")); } catch { }
 
             try { altitude = Boolean.Parse(root.GetValue("altitude")); } catch { }
+            try { terrainAltitude = Boolean.Parse(root.GetValue("terrainAltitude")); } catch { }
             try { atmDensity = Boolean.Parse(root.GetValue("atmDensity")); } catch { }
             try { atmosphericTemperature = Boolean.Parse(root.GetValue("atmosphericTemperature")); } catch { }
             try { currentStage = Boolean.Parse(root.GetValue("currentStage")); } catch { }
@@ -95,6 +100,7 @@ namespace KSPLogger
             try { geeForce_immediate = Boolean.Parse(root.GetValue("geeForce_immediate")); } catch { }
             try { heightFromTerrain = Boolean.Parse(root.GetValue("heightFromTerrain")); } catch { }
             try { horizontalSrfSpeed = Boolean.Parse(root.GetValue("horizontalSrfSpeed")); } catch { }
+            try { horizontalAcceleration = Boolean.Parse(root.GetValue("horizontalAcceleration")); } catch { }
             try { indicatedAirSpeed = Boolean.Parse(root.GetValue("indicatedAirSpeed")); } catch { }
             try { landedAt = Boolean.Parse(root.GetValue("landedAt")); } catch { }
             try { mach = Boolean.Parse(root.GetValue("mach")); } catch { }

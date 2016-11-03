@@ -19,6 +19,12 @@ namespace KSPLogger
         string line = "";
         string filenames = "";
 
+        double horizontalAcceleration = 0.0;
+        double horizontalSpeed = 0.0;
+        double verticalAcceleration = 0.0;
+        double verticalSpeed = 0.0;
+
+
         public void WriteLine()
         {
             Log.Info("WriteLine, file: " + cfg.ROOT_PATH + "/" + cfg.filePrefix);
@@ -55,16 +61,22 @@ namespace KSPLogger
 
         public void OnDestroy()
         {
-            if (cfg.singleLine)
-            {
-
-                char[] delimiterChars = { ':' };
-                string[] fname = filenames.Split(delimiterChars);
-                foreach (string s in fname)
+            Log.Info("OnDestroy");
+ //           return;
+            if (cfg != null)
+                if (cfg.singleLine)
                 {
-                    File.Delete(s);
+                    if (filenames.Length > 0)
+                    {
+                        char[] delimiterChars = { ':' };
+                        string[] fname = filenames.Split(delimiterChars);
+                        foreach (string s in fname)
+                        {
+                            File.Delete(s);
+                        }
+                    }
                 }
-            }
+            
         }
 
         public void Start()
@@ -111,6 +123,7 @@ namespace KSPLogger
 
             lastUpdate = Time.realtimeSinceStartup;
 
+            
             filenames = "";
             // From FlightGlobals
             if (cfg.ship_geeForce)
@@ -125,10 +138,18 @@ namespace KSPLogger
                 WriteFile("ship_srfSpeed", FlightGlobals.ship_srfSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.ship_verticalSpeed)
                 WriteFile("ship_verticalSpeed", FlightGlobals.ship_verticalSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
+            if (cfg.verticalAcceleration)
+            {
+                this.verticalAcceleration = (FlightGlobals.ship_verticalSpeed - this.verticalSpeed) / TimeWarp.fixedDeltaTime;
+                this.verticalSpeed = FlightGlobals.ship_verticalSpeed;
+                WriteFile("verticalAcceleration", this.verticalAcceleration.ToString("F" + cfg.decimalPlaces.ToString()));
+            }
 
             //fromFlightGlobals.ActiveVessel
             if (cfg.altitude)
                 WriteFile("altitude", FlightGlobals.ActiveVessel.altitude.ToString("F" + cfg.decimalPlaces.ToString()));
+            if (cfg.terrainAltitude)
+                WriteFile("terrainAltitude", FlightGlobals.ActiveVessel.terrainAltitude.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.atmDensity)
                 WriteFile("atmDensity", FlightGlobals.ActiveVessel.atmDensity.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.atmosphericTemperature)
@@ -147,6 +168,12 @@ namespace KSPLogger
                 WriteFile("heightFromTerrain", FlightGlobals.ActiveVessel.heightFromTerrain.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.horizontalSrfSpeed)
                 WriteFile("horizontalSrfSpeed", FlightGlobals.ActiveVessel.horizontalSrfSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
+            if (cfg.horizontalAcceleration)
+            {
+                this.horizontalAcceleration = (this.horizontalAcceleration - this.horizontalSpeed) / TimeWarp.fixedDeltaTime;
+                this.horizontalSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
+                WriteFile("horizontalAcceleration", this.horizontalAcceleration.ToString("F" + cfg.decimalPlaces.ToString()));
+            }
             if (cfg.indicatedAirSpeed)
                 WriteFile("indicatedAirSpeed", FlightGlobals.ActiveVessel.indicatedAirSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.landedAt)
@@ -157,8 +184,10 @@ namespace KSPLogger
                 WriteFile("missionTime", FlightGlobals.ActiveVessel.missionTime.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.obt_speed)
                 WriteFile("obt_speed", FlightGlobals.ActiveVessel.obt_speed.ToString("F" + cfg.decimalPlaces.ToString()));
+          
             if (cfg.vesselName)
                 WriteFile("vesselName", FlightGlobals.ActiveVessel.vesselName);
+
 
             // Only do the dCheck function once every 10 seconds
             if ((cfg.KIA || cfg.MIA) && Time.realtimeSinceStartup - lastDcheckUpdate >= 10)

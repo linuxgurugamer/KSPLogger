@@ -6,3 +6,6 @@
 
 0.3.0
 	Added MIA and KIA 
+
+0.4.0
+	Added terrainAltitude, horizontalAcceleration, verticalAcceleration
