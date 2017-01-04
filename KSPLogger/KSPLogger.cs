@@ -64,7 +64,7 @@ namespace KSPLogger
             Log.Info("OnDestroy");
  //           return;
             if (cfg != null)
-                if (cfg.singleLine)
+                if (cfg.singleLine && cfg.deleteOnExit)
                 {
                     if (filenames.Length > 0)
                     {

@@ -30,6 +30,7 @@ namespace KSPLogger
         public bool singleLine = true;
         public int decimalPlaces = 0;
         public float refreshRate = 0.1f;
+        public bool deleteOnExit = false;
 
         // From FlightGlobals
 
@@ -82,6 +83,9 @@ namespace KSPLogger
 
             try { singleLine = Boolean.Parse(root.GetValue("singleLine")); } catch { }
             try { decimalPlaces = Convert.ToUInt16(root.GetValue("decimalPlaces")); } catch (Exception) { }
+            
+            try { deleteOnExit = Boolean.Parse(root.GetValue("deleteOnExit")); } catch { }
+
             try { ship_geeForce = Boolean.Parse(root.GetValue("ship_geeForce")); } catch { }
             try { ship_latitude = Boolean.Parse(root.GetValue("ship_latitude")); } catch { }
             try { ship_longitude = Boolean.Parse(root.GetValue("ship_longitude")); } catch { }
