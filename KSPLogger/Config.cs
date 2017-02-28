@@ -60,6 +60,8 @@ namespace KSPLogger
         public bool mach = false;
         public bool missionTime = false;
         public bool obt_speed = false;
+        public bool ApA = false;
+        public bool PeA = false;
 
         public bool speed = false;
         public bool vesselName = false;

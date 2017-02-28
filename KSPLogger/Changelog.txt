@@ -10,6 +10,10 @@
 0.4.0
 	Added terrainAltitude, horizontalAcceleration, verticalAcceleration
 
-0.4.??
+0.4.2
+	Added deleteOnExit, which defaults to false
+
+0.4.3
 	Added AssemblyVersion to assembly
 	Added license
+	Added Ap and Pe (ApA and PeA)

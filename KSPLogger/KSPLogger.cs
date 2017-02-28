@@ -184,7 +184,14 @@ namespace KSPLogger
                 WriteFile("missionTime", FlightGlobals.ActiveVessel.missionTime.ToString("F" + cfg.decimalPlaces.ToString()));
             if (cfg.obt_speed)
                 WriteFile("obt_speed", FlightGlobals.ActiveVessel.obt_speed.ToString("F" + cfg.decimalPlaces.ToString()));
-          
+
+            if (cfg.ApA)
+                WriteFile("ApA", FlightGlobals.ActiveVessel.orbit.ApA.ToString("F" + cfg.decimalPlaces.ToString()));
+            if (cfg.PeA)
+                WriteFile("PeA", FlightGlobals.ActiveVessel.orbit.PeA.ToString("F" + cfg.decimalPlaces.ToString()));
+
+
+
             if (cfg.vesselName)
                 WriteFile("vesselName", FlightGlobals.ActiveVessel.vesselName);
 
