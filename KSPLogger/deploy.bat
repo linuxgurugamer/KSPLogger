@@ -1,5 +1,5 @@
 ﻿rem
-set H=R:\KSP_1.3.0_dev
+set H=R:\KSP_1.3.1_dev
 echo %H%
 
 set d=%H%

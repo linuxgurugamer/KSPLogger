@@ -17,3 +17,9 @@
 	Added AssemblyVersion to assembly
 	Added license
 	Added Ap and Pe (ApA and PeA)
+
+0.4.4
+	Updated for KSP 1.3.0
+
+0.4.5
+	Updated for KSP 1.3.1
