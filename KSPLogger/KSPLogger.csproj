@@ -70,10 +70,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>start /D D:\Users\jbb\github\KSPLogger\KSPLogger /WAIT deploy.bat
+    <PostBuildEvent>
+start /D D:\Users\jbb\github\KSPLogger /WAIT deploy.bat  $(TargetDir) $(TargetFileName)
 
 if $(ConfigurationName) == Release (
-start /D D:\Users\jbb\github\KSPLogger\KSPLogger /WAIT buildRelease.bat
+	start /D D:\Users\jbb\github\KSPLogger /WAIT buildRelease.bat $(TargetDir) $(TargetFileName)
 )</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
