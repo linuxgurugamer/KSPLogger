@@ -29,3 +29,6 @@
 
 0.4.6.1
 	Updated .version file for all of 1.4
+
+0.4.6.2
+	Version bump for 1.5 rebuild
