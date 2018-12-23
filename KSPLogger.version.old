@@ -1,8 +1,8 @@
-{
+﻿{
   "NAME": "KSPLogger",
   "URL": "http://ksp.spacetux.net/avc/KSPLogger",
   "DOWNLOAD": "https://github.com/linuxgurugamer/KSPLogger/releases",
-  "GITHUB": {
+    "GITHUB": {
     "USERNAME": "linuxgurugamer",
     "REPOSITORY": "KSPLogger"
   },
@@ -21,5 +21,10 @@
     "MAJOR": 1,
     "MINOR": 5,
     "PATCH": 1
+  },
+  "KSP_VERSION_MAX": {
+    "MAJOR": 1,
+    "MINOR": 5,
+    "PATCH": 99
   }
 }
