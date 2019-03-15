@@ -32,3 +32,6 @@
 
 0.4.6.2
 	Version bump for 1.5 rebuild
+
+0.4.6.4
+	Restored missing KSPLogger.cfg file
