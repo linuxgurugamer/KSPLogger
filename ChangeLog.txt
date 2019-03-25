@@ -35,3 +35,6 @@
 
 0.4.6.4
 	Restored missing KSPLogger.cfg file
+
+0.4.6.5
+	Added check to see if file prefix is an absolute file path, and uses it if it is

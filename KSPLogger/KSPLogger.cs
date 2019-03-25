@@ -30,7 +30,11 @@ namespace KSPLogger
             Log.Info("WriteLine, file: " + cfg.ROOT_PATH + "/" + cfg.filePrefix);
             if (cfg.onePerFile == false)
             {
-                filenames = cfg.ROOT_PATH + "/" + cfg.filePrefix + cfg.fileSuffix;
+                if (cfg.filePrefix[0] == '/' || cfg.filePrefix[1] == ':')
+                    filenames =  cfg.filePrefix + cfg.fileSuffix;
+                else
+                    filenames = cfg.ROOT_PATH + "/" + cfg.filePrefix + cfg.fileSuffix;
+
                 if (cfg.singleLine)
                     File.WriteAllText(filenames, line + cfg.eol);
                 else
@@ -39,6 +43,7 @@ namespace KSPLogger
             }
         }
 
+       
         public void WriteFile(string fileName, string value)
         {
             if (cfg.onePerFile == false)
@@ -47,9 +52,16 @@ namespace KSPLogger
             }
             else
             {
-                string fname = cfg.ROOT_PATH + cfg.filePrefix + "." + fileName + cfg.fileSuffix;
+                string fname = "";
+                if (cfg.filePrefix[0] == '/' || cfg.filePrefix[1] == ':')
+                    fname = cfg.filePrefix + fileName + cfg.fileSuffix;
+                else
+                    fname = cfg.ROOT_PATH + cfg.filePrefix + "." + fileName + cfg.fileSuffix; ;
+
+
+                //string fname = cfg.ROOT_PATH + cfg.filePrefix + "." + fileName + cfg.fileSuffix;
                 filenames += fname + ":";
-                Log.Info("WriteFile, file: " + cfg.ROOT_PATH + "/" + cfg.filePrefix);
+
 
                 if (cfg.singleLine)
                     File.WriteAllText(fname, value + cfg.eol);
