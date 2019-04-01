@@ -1,9 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP.Localization;
 
 
 namespace KSPLogger
@@ -11,89 +15,49 @@ namespace KSPLogger
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class KSPLogger : MonoBehaviour
     {
-        Config cfg = new Config();
+        internal static KSPLogger instance;
+        internal Config cfg = new Config();
 
-        float lastUpdate = 0.0f;
         float lastDcheckUpdate = 0.0f;
 
-        string line = "";
-        string filenames = "";
-
-        double horizontalAcceleration = 0.0;
-        double horizontalSpeed = 0.0;
-        double verticalAcceleration = 0.0;
-        double verticalSpeed = 0.0;
-
-
-        public void WriteLine()
-        {
-            Log.Info("WriteLine, file: " + cfg.ROOT_PATH + "/" + cfg.filePrefix);
-            if (cfg.onePerFile == false)
-            {
-                if (cfg.filePrefix[0] == '/' || cfg.filePrefix[1] == ':')
-                    filenames =  cfg.filePrefix + cfg.fileSuffix;
-                else
-                    filenames = cfg.ROOT_PATH + "/" + cfg.filePrefix + cfg.fileSuffix;
-
-                if (cfg.singleLine)
-                    File.WriteAllText(filenames, line + cfg.eol);
-                else
-                    File.AppendAllText(filenames, line + cfg.eol);
-                line = "";
-            }
-        }
-
-       
-        public void WriteFile(string fileName, string value)
-        {
-            if (cfg.onePerFile == false)
-            { 
-                line += value + cfg.separator;
-            }
-            else
-            {
-                string fname = "";
-                if (cfg.filePrefix[0] == '/' || cfg.filePrefix[1] == ':')
-                    fname = cfg.filePrefix + fileName + cfg.fileSuffix;
-                else
-                    fname = cfg.ROOT_PATH + cfg.filePrefix + "." + fileName + cfg.fileSuffix; ;
-
-
-                //string fname = cfg.ROOT_PATH + cfg.filePrefix + "." + fileName + cfg.fileSuffix;
-                filenames += fname + ":";
-
-
-                if (cfg.singleLine)
-                    File.WriteAllText(fname, value + cfg.eol);
-                else
-                    File.AppendAllText(fname, value + cfg.eol);
-            }
-            //  Log.Debug(fmt);
-        }
+        double lastHorizontalSpeed = 0.0;
+        double lastVerticalSpeed = 0.0;
 
         public void OnDestroy()
         {
             Log.Info("OnDestroy");
- //           return;
+
             if (cfg != null)
+            {
                 if (cfg.singleLine && cfg.deleteOnExit)
                 {
-                    if (filenames.Length > 0)
+                    if (BackgroundThread.filenames.Length > 0)
                     {
                         char[] delimiterChars = { ':' };
-                        string[] fname = filenames.Split(delimiterChars);
+                        string[] fname = BackgroundThread.filenames.Split(delimiterChars);
                         foreach (string s in fname)
                         {
-                            File.Delete(s);
+                            if (s!= "")
+                                File.Delete(s);
                         }
                     }
                 }
-            
+            }
+            if (thread1.IsAlive)
+                thread1.Abort();
         }
 
+        string decimalPlaces;
+        static Thread thread1;
         public void Start()
         {
+            instance = this;
             cfg.LoadConfiguration();
+            decimalPlaces = "F" + cfg.decimalPlaces.ToString();
+            thread1 = new Thread(new ThreadStart(BackgroundThread.ThreadFunc));
+            thread1.Start();
+            StartCoroutine(DoBackgroundJob());
+ 
         }
 
         //
@@ -110,116 +74,104 @@ namespace KSPLogger
             var roster = HighLogic.CurrentGame.CrewRoster;
 
             // 10 percent for dead and 5 percent for missing, note can only have dead in some career modes.
+
             foreach (ProtoCrewMember kerbal in roster.Crew)
             {
-               
+
                 if (kerbal.rosterStatus.ToString() == "Dead")
                 {
                     //if (KCareerStrings.Contains(kerbal.experienceTrait.Title))
-                        KDead++ ;                  
+                    KDead++;
                 }
                 if (kerbal.rosterStatus.ToString() == "Missing")
                 {
                     //if (KCareerStrings.Contains(kerbal.experienceTrait.Title))
-                        KMissing++;  
+                    KMissing++;
                 }
             }
         }
-        // use FixedUpdate since it is not called as often as Update or LateUpdate is, but 
-        // is still fast enough
 
-        public void FixedUpdate()
+        IEnumerator DoBackgroundJob()
         {
-            if (Time.realtimeSinceStartup - lastUpdate < cfg.refreshRate)
-                return;
+            while (true)
+            {
+                yield return new WaitForSeconds(cfg.refreshRate / 5);
+                yield return UpdateOBSData();
+                if (!thread1.IsAlive)
+                {
+                    Log.Error("ThreadFunc stopped, restarting");
+                    thread1 = new Thread(new ThreadStart(BackgroundThread.ThreadFunc));
+                    thread1.Start();
+                }
+            }
+        }
 
-            lastUpdate = Time.realtimeSinceStartup;
-
+        IEnumerator UpdateOBSData()
+        {
             
-            filenames = "";
-            // From FlightGlobals
-            if (cfg.ship_geeForce)
-                WriteFile("ship_geeForce", FlightGlobals.ship_geeForce.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.ship_latitude)
-                WriteFile("ship_latitude", FlightGlobals.ship_latitude.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.ship_longitude)
-                WriteFile("ship_longitude", FlightGlobals.ship_longitude.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.ship_obtSpeed)
-                WriteFile("ship_obtSpeed", FlightGlobals.ship_obtSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.ship_srfSpeed)
-                WriteFile("ship_srfSpeed", FlightGlobals.ship_srfSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.ship_verticalSpeed)
-                WriteFile("ship_verticalSpeed", FlightGlobals.ship_verticalSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.verticalAcceleration)
+            while (!BackgroundThread.initted || !BackgroundThread.semaphore.Wait(0, "UpdateOBSData") && thread1.IsAlive)
             {
-                this.verticalAcceleration = (FlightGlobals.ship_verticalSpeed - this.verticalSpeed) / TimeWarp.fixedDeltaTime;
-                this.verticalSpeed = FlightGlobals.ship_verticalSpeed;
-                WriteFile("verticalAcceleration", this.verticalAcceleration.ToString("F" + cfg.decimalPlaces.ToString()));
+                yield return null;
             }
 
-            //fromFlightGlobals.ActiveVessel
-            if (cfg.altitude)
-                WriteFile("altitude", FlightGlobals.ActiveVessel.altitude.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.terrainAltitude)
-                WriteFile("terrainAltitude", FlightGlobals.ActiveVessel.terrainAltitude.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.atmDensity)
-                WriteFile("atmDensity", FlightGlobals.ActiveVessel.atmDensity.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.atmosphericTemperature)
-                WriteFile("atmosphericTemperature", FlightGlobals.ActiveVessel.atmosphericTemperature.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.currentStage)
-                WriteFile("currentStage", FlightGlobals.ActiveVessel.currentStage.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.distanceToSun)
-                WriteFile("distanceToSun", FlightGlobals.ActiveVessel.distanceToSun.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.geeForce)
-                WriteFile("geeForce", FlightGlobals.ActiveVessel.geeForce.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.geeForce_immediate)
-                WriteFile("geeForce_immediate", FlightGlobals.ActiveVessel.geeForce_immediate.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.heightFromSurface)
-                WriteFile("heightFromSurface", FlightGlobals.ActiveVessel.heightFromSurface.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.heightFromTerrain)
-                WriteFile("heightFromTerrain", FlightGlobals.ActiveVessel.heightFromTerrain.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.horizontalSrfSpeed)
-                WriteFile("horizontalSrfSpeed", FlightGlobals.ActiveVessel.horizontalSrfSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.horizontalAcceleration)
+
+            BackgroundThread.ship_geeForce = FlightGlobals.ship_geeForce;
+            BackgroundThread.ship_latitude = FlightGlobals.ship_latitude;
+            BackgroundThread.ship_longitude = FlightGlobals.ship_longitude;
+            BackgroundThread.ship_obtSpeed = FlightGlobals.ship_obtSpeed;
+            BackgroundThread.ship_srfSpeed = FlightGlobals.ship_srfSpeed;
+            BackgroundThread.ship_verticalSpeed = FlightGlobals.ship_verticalSpeed;
+
             {
-                this.horizontalAcceleration = (this.horizontalAcceleration - this.horizontalSpeed) / TimeWarp.fixedDeltaTime;
-                this.horizontalSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
-                WriteFile("horizontalAcceleration", this.horizontalAcceleration.ToString("F" + cfg.decimalPlaces.ToString()));
+                BackgroundThread.verticalAcceleration = (FlightGlobals.ship_verticalSpeed - this.lastVerticalSpeed) / TimeWarp.fixedDeltaTime;
+                this.lastVerticalSpeed = FlightGlobals.ship_verticalSpeed;
             }
-            if (cfg.indicatedAirSpeed)
-                WriteFile("indicatedAirSpeed", FlightGlobals.ActiveVessel.indicatedAirSpeed.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.landedAt)
-                WriteFile("landedAt", FlightGlobals.ActiveVessel.landedAt);
-            if (cfg.mach)
-                WriteFile("mach", FlightGlobals.ActiveVessel.mach.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.missionTime)
-                WriteFile("missionTime", FlightGlobals.ActiveVessel.missionTime.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.obt_speed)
-                WriteFile("obt_speed", FlightGlobals.ActiveVessel.obt_speed.ToString("F" + cfg.decimalPlaces.ToString()));
+            BackgroundThread.altitude = FlightGlobals.ActiveVessel.altitude;
+            BackgroundThread.terrainAltitude = FlightGlobals.ActiveVessel.terrainAltitude;
+            BackgroundThread.atmDensity = FlightGlobals.ActiveVessel.atmDensity;
+            BackgroundThread.atmosphericTemperature = FlightGlobals.ActiveVessel.atmosphericTemperature;
 
-            if (cfg.ApA)
-                WriteFile("ApA", FlightGlobals.ActiveVessel.orbit.ApA.ToString("F" + cfg.decimalPlaces.ToString()));
-            if (cfg.PeA)
-                WriteFile("PeA", FlightGlobals.ActiveVessel.orbit.PeA.ToString("F" + cfg.decimalPlaces.ToString()));
+            BackgroundThread.currentStage = FlightGlobals.ActiveVessel.currentStage;
+            BackgroundThread.distanceToSun = FlightGlobals.ActiveVessel.distanceToSun;
+            BackgroundThread.geeForce = FlightGlobals.ActiveVessel.geeForce;
+            BackgroundThread.geeForce_immediate = FlightGlobals.ActiveVessel.geeForce_immediate;
+            BackgroundThread.heightFromSurface = FlightGlobals.ActiveVessel.heightFromSurface;
+
+            BackgroundThread.heightFromTerrain = FlightGlobals.ActiveVessel.heightFromTerrain;
+            BackgroundThread.horizontalSrfSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
+
+            {
+                BackgroundThread.horizontalAcceleration = (FlightGlobals.ActiveVessel.horizontalSrfSpeed - this.lastHorizontalSpeed) / TimeWarp.fixedDeltaTime;
+                this.lastHorizontalSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
+                
+            }
+
+            BackgroundThread.indicatedAirSpeed = FlightGlobals.ActiveVessel.indicatedAirSpeed;
+            BackgroundThread.landedAt = FlightGlobals.ActiveVessel.landedAt;
+            BackgroundThread.mach = FlightGlobals.ActiveVessel.mach;
+            BackgroundThread.missionTime = FlightGlobals.ActiveVessel.missionTime;
+            BackgroundThread.obt_speed = FlightGlobals.ActiveVessel.obt_speed;
+
+            BackgroundThread.ApA = FlightGlobals.ActiveVessel.orbit.ApA;
+            BackgroundThread.PeA = FlightGlobals.ActiveVessel.orbit.PeA;
 
 
-
-            if (cfg.vesselName)
-                WriteFile("vesselName", FlightGlobals.ActiveVessel.vesselName);
+            BackgroundThread.vesselName = FlightGlobals.ActiveVessel.vesselName;
 
 
             // Only do the dCheck function once every 10 seconds
             if ((cfg.KIA || cfg.MIA) && Time.realtimeSinceStartup - lastDcheckUpdate >= 10)
             {
                 dCheck();
-                lastDcheckUpdate = Time.realtimeSinceStartup;            
+                lastDcheckUpdate = Time.realtimeSinceStartup;
 
-                if (cfg.KIA)
-                    WriteFile("KIA", KDead.ToString());
-                if (cfg.MIA)
-                    WriteFile("MIA", KDead.ToString());
+                BackgroundThread.KDead = KDead;
+                BackgroundThread.KMissing = KMissing;
             }
-        }
 
+            BackgroundThread.semaphore.TryRelease("UpdateOBSData");
+
+            yield return null;
+        }
     }
 }

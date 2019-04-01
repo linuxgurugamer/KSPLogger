@@ -166,7 +166,7 @@ namespace KSPLogger
                 }
             }
             else
-                Log.Error("No config found");
+                Log.Info("No config found");
         }
 
 

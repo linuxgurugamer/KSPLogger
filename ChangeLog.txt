@@ -38,3 +38,16 @@
 
 0.4.6.5
 	Added check to see if file prefix is an absolute file path, and uses it if it is
+
+0.4.6.6
+	Moved actual writing of the data into a coroutine to avoid any delays from writing the data to a file from causing stutters
+	Fixed the Ap and Pe logging
+	Changed fileio from the WriteAllText to using BinaryFormatter for speed (writealltext bogs down if too many, too fast)
+	Added scaling of altitudes and speeds
+	Added appending of units to number
+
+
+0.5.0
+	Moved all writing of data into a real thread
+	Added coroutine to write data to static values for thread
+	Added synchronization between coroutine and thread

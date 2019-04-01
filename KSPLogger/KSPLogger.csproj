@@ -35,10 +35,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AssemblyVersion.tt</DependentUpon>
     </Compile>
+    <Compile Include="BackgroundThread.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="KSPLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Semaphore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="KSPLogger.cfg" />
@@ -70,11 +72,23 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
+    <PostBuildEvent>d:\Users\jbb\github\pdb2mdb.exe $(TargetPath)
+
+
+
+
+
+
 start /D D:\Users\jbb\github\KSPLogger /WAIT deploy.bat  $(TargetDir) $(TargetFileName)
 
+
+
 if $(ConfigurationName) == Release (
+
+
 	start /D D:\Users\jbb\github\KSPLogger /WAIT buildRelease.bat $(TargetDir) $(TargetFileName)
+
+
 )</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
