@@ -148,6 +148,19 @@ namespace KSPLogger
             if (cfg.MIA)
                 WriteFile("MIA", KDead.ToString());
 
+            if (cfg.fixed_ship_obtSpeed)
+                WriteFile("fixed_ship_obtSpeed", FormatFixedSpeed(ship_obtSpeed, cfg.fixed_ship_obtSpeed_divisor, cfg.fixed_ship_obtSpeedUnits));
+            if (cfg.fixed_ship_srfSpeed)
+                WriteFile("fixed_ship_srfSpeed", FormatFixedSpeed(ship_srfSpeed, cfg.fixed_ship_srfSpeed_divisor, cfg.fixed_ship_srfSpeedUnits));
+            if (cfg.fixed_ship_verticalSpeed)
+                WriteFile("fixed_ship_verticalSpeed", FormatFixedSpeed(ship_verticalSpeed, cfg.fixed_ship_verticalSpeed_divisor, cfg.fixed_ship_verticalSpeedUnits));
+            if (cfg.fixed_altitude)
+                WriteFile("fixed_altitude", formatFixedAltitude(altitude, cfg.fixed_altitude_divisor, cfg.fixed_altitudeUnits));
+            if (cfg.fixed_terrainAltitude)
+                WriteFile("fixed_terrainAltitude", formatFixedAltitude(altitude, cfg.fixed_terrainAltitude_divisor, cfg.fixed_terrainAltitudeUnits));
+
+
+
             if (cfg.onePerFile == false)
                  WriteLine();
         }
@@ -227,6 +240,11 @@ namespace KSPLogger
             }
             return speed.ToString(decimalPlaces) + " m/s";
         }
+        static string FormatFixedSpeed(double speed, double divisor, string units)
+        {
+            speed /= divisor;
+            return speed.ToString(decimalPlaces) + " " + units;
+        }
 
         static string FormatAltitude(double alt, bool units)
         {
@@ -238,6 +256,11 @@ namespace KSPLogger
                 return alt.ToString(decimalPlaces) + " Km";
             }
             return alt.ToString(decimalPlaces) + " m";
+        }
+        static string formatFixedAltitude(double alt, double divisor, string units)
+        {
+            alt /= divisor;
+            return alt.ToString(decimalPlaces) + " " + units;
         }
 #endregion
 

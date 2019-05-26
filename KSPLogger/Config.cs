@@ -9,7 +9,7 @@ using KSPAssets;
 
 namespace KSPLogger
 {
-    
+
     public class Config
     {
         public string ROOT_PATH = KSPUtil.ApplicationRootPath;
@@ -81,23 +81,43 @@ namespace KSPLogger
         public bool ApA_Units;
         public bool PeA_Units;
 
+        public bool fixed_ship_obtSpeed = false;
+        public double fixed_ship_obtSpeed_divisor = 1000;
+        public string fixed_ship_obtSpeedUnits = "km/sec";
+
+        public bool fixed_ship_srfSpeed = false;
+        public double fixed_ship_srfSpeed_divisor = 1000;
+        public string fixed_ship_srfSpeedUnits = "km/sec";
+
+        public bool fixed_ship_verticalSpeed = false;
+        public double fixed_ship_verticalSpeed_divisor = 1000;
+        public string fixed_ship_verticalSpeedUnits = "km/sec";
+
+        public bool fixed_altitude = false;
+        public double fixed_altitude_divisor = 1000;
+        public string fixed_altitudeUnits = "km";
+
+        public bool fixed_terrainAltitude = false;
+        public double fixed_terrainAltitude_divisor = 1000;
+        public string fixed_terrainAltitudeUnits = "km";
+
         void parseConfigNode(ref ConfigNode root)
         {
             try { filePrefix = root.GetValue("filePrefix"); } catch { }
             try { fileSuffix = root.GetValue("fileSuffix"); } catch { }
-            
+
             try { unixFormat = Boolean.Parse(root.GetValue("unixFormat")); } catch { }
             try { onePerFile = Boolean.Parse(root.GetValue("onePerFile")); } catch { }
 
             try { separator = root.GetValue("separator"); } catch { }
 
             try { singleLine = Boolean.Parse(root.GetValue("singleLine")); } catch { }
-            
+
             try { refreshRate = (float)Convert.ToDouble(root.GetValue("refreshRate")); } catch (Exception) { }
 
             try { singleLine = Boolean.Parse(root.GetValue("singleLine")); } catch { }
             try { decimalPlaces = Convert.ToUInt16(root.GetValue("decimalPlaces")); } catch (Exception) { }
-            
+
             try { deleteOnExit = Boolean.Parse(root.GetValue("deleteOnExit")); } catch { }
 
             try { ship_geeForce = Boolean.Parse(root.GetValue("ship_geeForce")); } catch { }
@@ -135,6 +155,7 @@ namespace KSPLogger
 
 
             try { scaleMeters = Boolean.Parse(root.GetValue("scaleMeters")); } catch { }
+
             try { ship_obtSpeedUnits = Boolean.Parse(root.GetValue("ship_obtSpeedUnits")); } catch { }
             try { ship_srfSpeedUnits = Boolean.Parse(root.GetValue("ship_srfSpeedUnits")); } catch { }
             try { ship_verticalSpeedUnits = Boolean.Parse(root.GetValue("ship_verticalSpeedUnits")); } catch { }
@@ -147,12 +168,30 @@ namespace KSPLogger
             try { ApA_Units = Boolean.Parse(root.GetValue("ApA_Units")); } catch { }
             try { PeA_Units = Boolean.Parse(root.GetValue("PeA_Units")); } catch { }
 
-        }
+            try { fixed_ship_obtSpeed = Boolean.Parse(root.GetValue("fixed_ship_obtSpeed")); } catch { }
+            try { fixed_ship_obtSpeed_divisor = Double.Parse(root.GetValue("fixed_ship_obtSpeed_divisor")); } catch { }
+            try { fixed_ship_obtSpeedUnits = root.GetValue("fixed_ship_obtSpeedUnits"); } catch { }
 
+            try { fixed_ship_srfSpeed = Boolean.Parse(root.GetValue("fixed_ship_srfSpeed")); } catch { }
+            try { fixed_ship_srfSpeed_divisor = Double.Parse(root.GetValue("fixed_ship_srfSpeed_divisor")); } catch { }
+            try { fixed_ship_srfSpeedUnits = root.GetValue("fixed_ship_srfSpeedUnits"); } catch { }
+
+            try { fixed_ship_verticalSpeed = Boolean.Parse(root.GetValue("fixed_ship_verticalSpeed")); } catch { }
+            try { fixed_ship_verticalSpeed_divisor = Double.Parse(root.GetValue("fixed_ship_verticalSpeed_divisor")); } catch { }
+            try { fixed_ship_verticalSpeedUnits = root.GetValue("fixed_ship_verticalSpeedUnits"); } catch { }
+
+            try { fixed_altitude = Boolean.Parse(root.GetValue("fixed_altitude")); } catch { }
+            try { fixed_altitude_divisor = Double.Parse(root.GetValue("fixed_altitude_divisor")); } catch { }
+            try { fixed_altitudeUnits = root.GetValue("fixed_altitudeUnits"); } catch { }
+
+            try { fixed_terrainAltitude = Boolean.Parse(root.GetValue("fixed_terrainAltitude")); } catch { }
+            try { fixed_terrainAltitude_divisor = Double.Parse(root.GetValue("fixed_terrainAltitude_divisor")); } catch { }
+            try { fixed_terrainAltitudeUnits = root.GetValue("fixed_terrainAltitudeUnits"); } catch { }
+        }
 
         public void LoadConfiguration()
         {
-            configFile = ConfigNode.Load(ROOT_PATH + DIR + "/"  +CFG_FILE);
+            configFile = ConfigNode.Load(ROOT_PATH + DIR + "/" + CFG_FILE);
 
             if (configFile != null)
             {

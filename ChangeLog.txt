@@ -51,3 +51,25 @@
 	Moved all writing of data into a real thread
 	Added coroutine to write data to static values for thread
 	Added synchronization between coroutine and thread
+
+0.5.1
+	Added new data fields:
+			fixed_ship_obtSpeed = false
+			fixed_ship_obtSpeed_divisor = 1000
+			fixed_ship_obtSpeedUnits = km/sec
+		
+			fixed_ship_srfSpeed = false
+			fixed_ship_srfSpeed_divisor = 1000
+			fixed_ship_srfSpeedUnits = km/sec
+        
+			fixed_ship_verticalSpeed = false
+			fixed_ship_verticalSpeed_divisor = 1000
+			fixed_ship_verticalSpeedUnits = km/sec
+
+			fixed_altitude = false
+			fixed_altitude_divisor = 1000
+			fixed_altitudeUnits = km
+
+			fixed_terrainAltitude = false
+			fixed_terrainAltitude_divisor = 1000
+			fixed_terrainAltitudeUnits = km
