@@ -53,6 +53,7 @@
 	Added synchronization between coroutine and thread
 
 0.5.1
+	Updated Assemblyfile.tt
 	Added new data fields:
 			fixed_ship_obtSpeed = false
 			fixed_ship_obtSpeed_divisor = 1000
