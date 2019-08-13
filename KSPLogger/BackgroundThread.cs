@@ -35,6 +35,10 @@ namespace KSPLogger
         
         static string line = "";
         internal static string filenames = "";
+
+        internal static string biome = "";
+        internal static double inclination;
+
         static Config cfg;
 
 
@@ -158,7 +162,10 @@ namespace KSPLogger
                 WriteFile("fixed_altitude", formatFixedAltitude(altitude, cfg.fixed_altitude_divisor, cfg.fixed_altitudeUnits));
             if (cfg.fixed_terrainAltitude)
                 WriteFile("fixed_terrainAltitude", formatFixedAltitude(altitude, cfg.fixed_terrainAltitude_divisor, cfg.fixed_terrainAltitudeUnits));
-
+            if (cfg.inclination)
+                WriteFile("inclination", inclination.ToString("F1"));
+            if (cfg.biome)
+                WriteFile("biome", biome);
 
 
             if (cfg.onePerFile == false)
@@ -262,7 +269,7 @@ namespace KSPLogger
             alt /= divisor;
             return alt.ToString(decimalPlaces) + " " + units;
         }
-#endregion
+        #endregion
 
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -14,7 +14,8 @@ namespace KSPLogger
     {
         public string ROOT_PATH = KSPUtil.ApplicationRootPath;
         string DIR = "GameData/KSPLogger";
-        static readonly string CFG_FILE = "KSPLogger.cfg";
+        static readonly string DEFAULT_CFG_FILE = "PluginData/KSPLogger_Default.cfg";
+        static readonly string CFG_FILE = "PluginData/KSPLogger.cfg";
 
         static readonly string NODENAME = "KSPLogger";
         private static ConfigNode configFile = null;
@@ -69,6 +70,8 @@ namespace KSPLogger
         public bool KIA = false;
         public bool MIA = false;
 
+        public bool inclination = false;
+        public bool biome = false;
 
         public bool scaleMeters;
         public bool ship_obtSpeedUnits;
@@ -168,6 +171,9 @@ namespace KSPLogger
             try { ApA_Units = Boolean.Parse(root.GetValue("ApA_Units")); } catch { }
             try { PeA_Units = Boolean.Parse(root.GetValue("PeA_Units")); } catch { }
 
+            try { inclination = Boolean.Parse(root.GetValue("inclination")); } catch { }
+            try { biome = Boolean.Parse(root.GetValue("biome")); } catch { }
+
             try { fixed_ship_obtSpeed = Boolean.Parse(root.GetValue("fixed_ship_obtSpeed")); } catch { }
             try { fixed_ship_obtSpeed_divisor = Double.Parse(root.GetValue("fixed_ship_obtSpeed_divisor")); } catch { }
             try { fixed_ship_obtSpeedUnits = root.GetValue("fixed_ship_obtSpeedUnits"); } catch { }
@@ -189,13 +195,32 @@ namespace KSPLogger
             try { fixed_terrainAltitudeUnits = root.GetValue("fixed_terrainAltitudeUnits"); } catch { }
         }
 
+        DateTime lastWriteTime;
+
+        string fname {  get { return ROOT_PATH + DIR + "/" + CFG_FILE; } }
+
+        public void ReloadIfChanged()
+        {
+            Log.Info("ReloadIfChanged");
+            if (lastWriteTime != File.GetLastWriteTime(fname))
+                LoadConfiguration();
+        }
+
         public void LoadConfiguration()
         {
-            configFile = ConfigNode.Load(ROOT_PATH + DIR + "/" + CFG_FILE);
+            Log.Info("LoadConfiguration");
+            lastWriteTime = File.GetLastWriteTime(fname);
+           
+            Log.Info("LoadConfiguration, fname: " + fname);
+            if (!File.Exists(fname))
+            {
+                File.Copy(ROOT_PATH + DIR + "/" + DEFAULT_CFG_FILE, fname);
+            }
+            configFile = ConfigNode.Load(fname);
 
             if (configFile != null)
             {
-                Log.Info("Loading config: " + ROOT_PATH + DIR + "/" + CFG_FILE);
+                Log.Info("Loading config: " + fname);
                 configFileNode = configFile.GetNode(NODENAME);
                 if (configFileNode != null)
                 {

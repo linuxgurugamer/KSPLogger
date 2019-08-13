@@ -11,8 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionF
 		ChangeLog.txt = ChangeLog.txt
 		deploy.bat = deploy.bat
 		jenkins.txt = jenkins.txt
-		GameData\KSPLogger\KSPLogger.cfg = GameData\KSPLogger\KSPLogger.cfg
 		KSPLogger.version = KSPLogger.version
+		GameData\KSPLogger\PluginData\KSPLogger_Default.cfg = GameData\KSPLogger\PluginData\KSPLogger_Default.cfg
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection

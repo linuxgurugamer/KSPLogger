@@ -74,3 +74,12 @@
 			fixed_terrainAltitude = false
 			fixed_terrainAltitude_divisor = 1000
 			fixed_terrainAltitudeUnits = km
+
+	0.5.2
+		Added new data fields:
+			inclination
+			biome
+		Renamed distributed file to KSPLogger_Default.cfg
+		Moved config file into PluginData (so ModuleManager wont' reload every restart)
+		Checks the config file every 5 seconds to see if it was changed, and reloads if it is
+		Added InstallChecker

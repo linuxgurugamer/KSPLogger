@@ -31,9 +31,10 @@ namespace KSPLogger
 
         public bool Wait(int x = -1, string s = "")
         {
+#if false
             if (s != "")
                 Log.Info("Wait: " + s);
-
+#endif
             lock (locker)
             {
                 while (count == 0)
@@ -49,8 +50,10 @@ namespace KSPLogger
 
         public bool TryRelease(string s = "")
         {
+#if false
             if (s != "")
                 Log.Info("TryRelease: " + s);
+#endif
             lock (locker)
             {
                 if (count < limit)

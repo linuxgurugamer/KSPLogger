@@ -51,13 +51,14 @@ namespace KSPLogger
         static Thread thread1;
         public void Start()
         {
+            Log.Info("Start");
             instance = this;
             cfg.LoadConfiguration();
             decimalPlaces = "F" + cfg.decimalPlaces.ToString();
             thread1 = new Thread(new ThreadStart(BackgroundThread.ThreadFunc));
             thread1.Start();
             StartCoroutine(DoBackgroundJob());
- 
+            StartCoroutine(CheckForUpdates());
         }
 
         //
@@ -105,6 +106,18 @@ namespace KSPLogger
                 }
             }
         }
+
+        IEnumerator CheckForUpdates()
+        {
+            Log.Info("CheckForUpdates entry");
+            while (true)
+            {
+                Log.Info("CheckForUpdates");
+                yield return new WaitForSeconds(5);
+                cfg.ReloadIfChanged();
+            }
+        }
+
 
         IEnumerator UpdateOBSData()
         {
@@ -159,6 +172,9 @@ namespace KSPLogger
             BackgroundThread.vesselName = FlightGlobals.ActiveVessel.vesselName;
 
 
+            BackgroundThread.biome = CurrentBiome(FlightGlobals.ActiveVessel);
+            BackgroundThread.inclination = FlightGlobals.ActiveVessel.orbit.inclination;
+
             // Only do the dCheck function once every 10 seconds
             if ((cfg.KIA || cfg.MIA) && Time.realtimeSinceStartup - lastDcheckUpdate >= 10)
             {
@@ -172,6 +188,45 @@ namespace KSPLogger
             BackgroundThread.semaphore.TryRelease("UpdateOBSData");
 
             yield return null;
+        }
+
+
+  
+        // Following method from  Mechjeb
+        public string CurrentBiome(Vessel vessel)
+        {
+            if (vessel.landedAt != string.Empty)
+                return vessel.landedAt;
+            if (vessel.mainBody.BiomeMap == null)
+                return "N/A";
+            string biome = vessel.mainBody.BiomeMap.GetAtt(vessel.latitude * UtilMath.Deg2Rad, vessel.longitude * UtilMath.Deg2Rad).name;
+            if (biome != "")
+                biome = "'s " + biome;
+
+            switch (vessel.situation)
+            {
+                //ExperimentSituations.SrfLanded
+                case Vessel.Situations.LANDED:
+                case Vessel.Situations.PRELAUNCH:
+                    return vessel.mainBody.displayName + (biome == "" ? "'s surface" : biome);
+                //ExperimentSituations.SrfSplashed
+                case Vessel.Situations.SPLASHED:
+                    return vessel.mainBody.displayName + (biome == "" ? "'s oceans" : biome);
+                case Vessel.Situations.FLYING:
+                    if (vessel.altitude < vessel.mainBody.scienceValues.flyingAltitudeThreshold)
+                        //ExperimentSituations.FlyingLow
+                        return "Flying over " + vessel.mainBody.displayName + biome;
+                    else
+                        //ExperimentSituations.FlyingHigh
+                        return "Upper atmosphere of " + vessel.mainBody.displayName + biome;
+                default:
+                    if (vessel.altitude < vessel.mainBody.scienceValues.spaceAltitudeThreshold)
+                        //ExperimentSituations.InSpaceLow
+                        return "Space just above " + vessel.mainBody.displayName + biome;
+                    else
+                        // ExperimentSituations.InSpaceHigh
+                        return "Space high over " + vessel.mainBody.displayName + biome;
+            }
         }
     }
 }

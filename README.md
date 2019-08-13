@@ -7,7 +7,11 @@ Installation
 Copy KSPLogger directory into the GameData directory
 
 Configuration
-There is a config file called KSPLogger.cfg, which contains all the value which can be set.
+There is a config file called PluginData/KSPLogger_Default.cfg, which contains all the value which can be set.
+
+You will need to copy that file to PluginData/KSPLogger.cfg.  This will avoid the issue moving forward of new versions 
+overwriting your existing config
+
 There are three sections in the config file:
 
 KSPLogger values - Contains values which control the behaviour of the mod.  Each line in the config file is documented
