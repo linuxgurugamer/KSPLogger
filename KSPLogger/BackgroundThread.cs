@@ -228,7 +228,10 @@ namespace KSPLogger
             if (cfg.onePerFile == false)
             {
                 filenames = cfg.ROOT_PATH + cfg.filePrefix + cfg.fileSuffix;
-                File.AppendAllText(filenames, line + cfg.eol);
+                if (cfg.singleLine)
+                    File.WriteAllText(filenames, line + cfg.eol);
+                else
+                    File.AppendAllText(filenames, line + cfg.eol);
             }
 
             line = "";

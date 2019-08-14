@@ -118,7 +118,6 @@ namespace KSPLogger
 
             try { refreshRate = (float)Convert.ToDouble(root.GetValue("refreshRate")); } catch (Exception) { }
 
-            try { singleLine = Boolean.Parse(root.GetValue("singleLine")); } catch { }
             try { decimalPlaces = Convert.ToUInt16(root.GetValue("decimalPlaces")); } catch (Exception) { }
 
             try { deleteOnExit = Boolean.Parse(root.GetValue("deleteOnExit")); } catch { }

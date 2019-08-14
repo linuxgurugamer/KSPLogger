@@ -83,3 +83,7 @@
 		Moved config file into PluginData (so ModuleManager wont' reload every restart)
 		Checks the config file every 5 seconds to see if it was changed, and reloads if it is
 		Added InstallChecker
+
+	0.5.3
+		Fixed the singleLine so that if true, it will overwrite a file rather than append
+		Delete duplicated line in code when reading config
