@@ -12,7 +12,7 @@ namespace KSPLogger
 
     public class Config
     {
-        public string ROOT_PATH = KSPUtil.ApplicationRootPath;
+        public string ROOT_PATH { get { return KSPUtil.ApplicationRootPath; } }
         string DIR = "GameData/KSPLogger";
         static readonly string DEFAULT_CFG_FILE = "PluginData/KSPLogger_Default.cfg";
         static readonly string CFG_FILE = "PluginData/KSPLogger.cfg";
