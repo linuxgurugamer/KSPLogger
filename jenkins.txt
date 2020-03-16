@@ -30,7 +30,9 @@
 2:KSPLogger,KSPLogger/KSPLogger.csproj,KSPLogger.version,GameData/KSPLogger/Plugins
 
 # 3:SOURCEFILE, DESTDIR
-3:KSPLogger.version,GameData/KSPLogger
+
+3:KSPLogger.version, GameData/KSPLogger
+
 #3:LICENSE.md,GameData/KerbalHotSeat
 #3:README.md,GameData/KerbalHotSeat
 
