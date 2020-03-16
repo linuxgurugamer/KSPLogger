@@ -95,3 +95,6 @@
 
 0.6.0.1
 	Changed ROOT_PATH from a variable to a property to avoid calling a unity function outofframe
+
+0.6.0.2
+	Version bump for CKAN
