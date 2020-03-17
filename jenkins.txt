@@ -23,15 +23,14 @@
 # 0:KSPVersion
 # 0:1.3
 
+3:KSPLogger.version, GameData/KSPLogger
+
 # 1:GAMEDIR, VERSIONFILE [, GITHUBREPO ]
 1:KSPLogger, KSPLogger.version
 
 # 2:PROJNAME, PROJFILE, VERSIONFILE, PLUGINSFOLDER
 2:KSPLogger,KSPLogger/KSPLogger.csproj,KSPLogger.version,GameData/KSPLogger/Plugins
 
-# 3:SOURCEFILE, DESTDIR
-
-3:KSPLogger.version, GameData/KSPLogger
 
 #3:LICENSE.md,GameData/KerbalHotSeat
 #3:README.md,GameData/KerbalHotSeat
