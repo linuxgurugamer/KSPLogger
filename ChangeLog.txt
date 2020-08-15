@@ -98,3 +98,6 @@
 
 0.6.0.2
 	Version bump for CKAN
+
+0.6.0.3
+	Added some more descriptive text to the default config
