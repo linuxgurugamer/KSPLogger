@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
+//using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System.Text;
@@ -13,14 +13,14 @@ using KSP.Localization;
 namespace KSPLogger
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class KSPLogger : MonoBehaviour
+    public partial class KSPLogger : MonoBehaviour
     {
         internal static KSPLogger instance;
-        internal Config cfg = new Config();
+        static internal Config cfg = new Config();
 
         float lastDcheckUpdate = 0.0f;
 
-        double lastHorizontalSpeed = 0.0;
+        static double lastHorizontalSpeed = 0.0;
         double lastVerticalSpeed = 0.0;
 
         public void OnDestroy()
@@ -31,41 +31,37 @@ namespace KSPLogger
             {
                 if (cfg.singleLine && cfg.deleteOnExit)
                 {
-                    if (BackgroundThread.filenames.Length > 0)
+                    if (filenames.Length > 0)
                     {
                         char[] delimiterChars = { ':' };
-                        string[] fname = BackgroundThread.filenames.Split(delimiterChars);
+                        string[] fname = filenames.Split(delimiterChars);
                         foreach (string s in fname)
                         {
-                            if (s!= "")
+                            if (s != "")
                                 File.Delete(s);
                         }
                     }
                 }
             }
-            if (thread1.IsAlive)
-                thread1.Abort();
+            StopCoroutine("ThreadFunc");
         }
 
-        string decimalPlaces;
-        static Thread thread1;
+        static string decimalPlaces;
+
         public void Start()
         {
             Log.Info("Start");
             instance = this;
             cfg.LoadConfiguration();
             decimalPlaces = "F" + cfg.decimalPlaces.ToString();
-            thread1 = new Thread(new ThreadStart(BackgroundThread.ThreadFunc));
-            thread1.Start();
-            StartCoroutine(DoBackgroundJob());
+            StartCoroutine("ThreadFunc");
+            //StartCoroutine(DoBackgroundJob());
             StartCoroutine(CheckForUpdates());
         }
 
         //
         // Following copied from TheReadPanda's Hire mod with permission
         //
-        int KDead = 0;
-        int KMissing = 0;
         //private string[] KCareerStrings = { "Pilot", "Scientist", "Engineer" };
 
         void dCheck()
@@ -92,20 +88,24 @@ namespace KSPLogger
             }
         }
 
+#if false
         IEnumerator DoBackgroundJob()
         {
+            int lastRunningCnt = 0;
             while (true)
             {
-                yield return new WaitForSeconds(cfg.refreshRate / 5);
-                yield return UpdateOBSData();
-                if (!thread1.IsAlive)
+                yield return new WaitForSeconds(cfg.refreshRate);
+                lastRunningCnt++;
+                if (lastRunningCnt > runningCnt + 10)
                 {
                     Log.Error("ThreadFunc stopped, restarting");
-                    thread1 = new Thread(new ThreadStart(BackgroundThread.ThreadFunc));
-                    thread1.Start();
+                    StopCoroutine("ThreadFunc");
+                    StartCoroutine("ThreadFunc");
                 }
+                runningCnt = lastRunningCnt;
             }
         }
+#endif
 
         IEnumerator CheckForUpdates()
         {
@@ -121,59 +121,29 @@ namespace KSPLogger
 
         IEnumerator UpdateOBSData()
         {
-            
-            while (!BackgroundThread.initted || !BackgroundThread.semaphore.Wait(0, "UpdateOBSData") && thread1.IsAlive)
+
+            while (!initted)
             {
                 yield return null;
             }
 
+            lastVerticalSpeed = FlightGlobals.ship_verticalSpeed;
 
-            BackgroundThread.ship_geeForce = FlightGlobals.ship_geeForce;
-            BackgroundThread.ship_latitude = FlightGlobals.ship_latitude;
-            BackgroundThread.ship_longitude = FlightGlobals.ship_longitude;
-            BackgroundThread.ship_obtSpeed = FlightGlobals.ship_obtSpeed;
-            BackgroundThread.ship_srfSpeed = FlightGlobals.ship_srfSpeed;
-            BackgroundThread.ship_verticalSpeed = FlightGlobals.ship_verticalSpeed;
+            currentStage = FlightGlobals.ActiveVessel.currentStage;
+            heightFromSurface = FlightGlobals.ActiveVessel.heightFromSurface;
 
-            {
-                BackgroundThread.verticalAcceleration = (FlightGlobals.ship_verticalSpeed - this.lastVerticalSpeed) / TimeWarp.fixedDeltaTime;
-                this.lastVerticalSpeed = FlightGlobals.ship_verticalSpeed;
-            }
-            BackgroundThread.altitude = FlightGlobals.ActiveVessel.altitude;
-            BackgroundThread.terrainAltitude = FlightGlobals.ActiveVessel.terrainAltitude;
-            BackgroundThread.atmDensity = FlightGlobals.ActiveVessel.atmDensity;
-            BackgroundThread.atmosphericTemperature = FlightGlobals.ActiveVessel.atmosphericTemperature;
+            heightFromTerrain = FlightGlobals.ActiveVessel.heightFromTerrain;
 
-            BackgroundThread.currentStage = FlightGlobals.ActiveVessel.currentStage;
-            BackgroundThread.distanceToSun = FlightGlobals.ActiveVessel.distanceToSun;
-            BackgroundThread.geeForce = FlightGlobals.ActiveVessel.geeForce;
-            BackgroundThread.geeForce_immediate = FlightGlobals.ActiveVessel.geeForce_immediate;
-            BackgroundThread.heightFromSurface = FlightGlobals.ActiveVessel.heightFromSurface;
-
-            BackgroundThread.heightFromTerrain = FlightGlobals.ActiveVessel.heightFromTerrain;
-            BackgroundThread.horizontalSrfSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
-
-            {
-                BackgroundThread.horizontalAcceleration = (FlightGlobals.ActiveVessel.horizontalSrfSpeed - this.lastHorizontalSpeed) / TimeWarp.fixedDeltaTime;
-                this.lastHorizontalSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
-                
-            }
-
-            BackgroundThread.indicatedAirSpeed = FlightGlobals.ActiveVessel.indicatedAirSpeed;
-            BackgroundThread.landedAt = FlightGlobals.ActiveVessel.landedAt;
-            BackgroundThread.mach = FlightGlobals.ActiveVessel.mach;
-            BackgroundThread.missionTime = FlightGlobals.ActiveVessel.missionTime;
-            BackgroundThread.obt_speed = FlightGlobals.ActiveVessel.obt_speed;
-
-            BackgroundThread.ApA = FlightGlobals.ActiveVessel.orbit.ApA;
-            BackgroundThread.PeA = FlightGlobals.ActiveVessel.orbit.PeA;
+            lastHorizontalSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
 
 
-            BackgroundThread.vesselName = FlightGlobals.ActiveVessel.vesselName;
+            landedAt = FlightGlobals.ActiveVessel.landedAt;
+
+            vesselName = FlightGlobals.ActiveVessel.vesselName;
 
 
-            BackgroundThread.biome = CurrentBiome(FlightGlobals.ActiveVessel);
-            BackgroundThread.inclination = FlightGlobals.ActiveVessel.orbit.inclination;
+            biome = CurrentBiome(FlightGlobals.ActiveVessel);
+            inclination = FlightGlobals.ActiveVessel.orbit.inclination;
 
             // Only do the dCheck function once every 10 seconds
             if ((cfg.KIA || cfg.MIA) && Time.realtimeSinceStartup - lastDcheckUpdate >= 10)
@@ -181,17 +151,14 @@ namespace KSPLogger
                 dCheck();
                 lastDcheckUpdate = Time.realtimeSinceStartup;
 
-                BackgroundThread.KDead = KDead;
-                BackgroundThread.KMissing = KMissing;
             }
 
-            BackgroundThread.semaphore.TryRelease("UpdateOBSData");
 
             yield return null;
         }
 
 
-  
+
         // Following method from  Mechjeb
         public string CurrentBiome(Vessel vessel)
         {

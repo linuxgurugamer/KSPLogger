@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
+//using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -12,26 +12,25 @@ using KSP.Localization;
 
 namespace KSPLogger
 {
-    class BackgroundThread
+    public partial  class KSPLogger
     {
-        internal static Semaphore semaphore;
         internal static bool initted = false;
         internal static bool doExit = false;
 
         // All data values are copied into these static variables by the main thread in a CoRoutine.
 
-        internal static double ship_geeForce, ship_latitude, ship_longitude, ship_srfSpeed, ship_verticalSpeed, verticalAcceleration;
-        internal static double ship_obtSpeed;
-        internal static double altitude, terrainAltitude, atmDensity, atmosphericTemperature, distanceToSun, geeForce, geeForce_immediate, horizontalSrfSpeed,
-            horizontalAcceleration, indicatedAirSpeed, mach, missionTime;
-        internal static double obt_speed, ApA, PeA;
+        //internal static double ship_geeForce, ship_latitude, ship_longitude, ship_srfSpeed, ship_verticalSpeed, verticalAcceleration;
+        //internal static double ship_obtSpeed;
+        //internal static double altitude, terrainAltitude, atmDensity, atmosphericTemperature, distanceToSun, geeForce, geeForce_immediate, horizontalSrfSpeed,
+        //    horizontalAcceleration, indicatedAirSpeed, mach, missionTime;
+        //internal static double obt_speed, ApA, PeA;
 
         internal static float heightFromSurface, heightFromTerrain;
 
         internal static int currentStage, KDead, KMissing;
 
         internal static string landedAt, vesselName;
-        static string decimalPlaces;
+        //static string decimalPlaces;
         
         static string line = "";
         internal static string filenames = "";
@@ -39,30 +38,23 @@ namespace KSPLogger
         internal static string biome = "";
         internal static double inclination;
 
-        static Config cfg;
+        int runningCnt = 0;
+        //static Config cfg;
 
 
-        internal static void ThreadFunc()
+        IEnumerator ThreadFunc()
         {
-            cfg = KSPLogger.instance.cfg;
+            UpdateOBSData();
+            //cfg = KSPLogger.instance.cfg;
             decimalPlaces = "F" + cfg.decimalPlaces.ToString();
 
-            semaphore = new Semaphore(1, 1);
 
             initted = true;
             while (true)
             {
-                Thread.Sleep((int)(cfg.refreshRate * 1000));
-
-                while (!BackgroundThread.semaphore.Wait(0, "ThreadFunc"))
-                {
-                    // This will sleep for 1/10 of the refreshRate
-                     Thread.Sleep((int)(cfg.refreshRate * 100));
-                }
+                yield return new WaitForSeconds(cfg.refreshRate);
 
                 WriteOBSData();
-
-                BackgroundThread.semaphore.TryRelease("ThreadFunc");
             }
         }
 
@@ -73,73 +65,73 @@ namespace KSPLogger
             filenames = "";
             // From FlightGlobals
             if (cfg.ship_geeForce)
-                WriteFile("ship_geeForce", ship_geeForce.ToString(decimalPlaces));
+                WriteFile("ship_geeForce", FlightGlobals.ship_geeForce.ToString(decimalPlaces));
 
             if (cfg.ship_latitude)
-                WriteFile("ship_latitude", ship_latitude.ToString(decimalPlaces));
+                WriteFile("ship_latitude", FlightGlobals.ship_latitude.ToString(decimalPlaces));
 
             if (cfg.ship_longitude)
-                WriteFile("ship_longitude", ship_longitude.ToString(decimalPlaces));
+                WriteFile("ship_longitude", FlightGlobals.ship_longitude.ToString(decimalPlaces));
 
             if (cfg.ship_obtSpeed)
-                WriteFile("ship_obtSpeed", FormatSpeed(ship_obtSpeed, cfg.ship_obtSpeedUnits));
+                WriteFile("ship_obtSpeed", FormatSpeed(FlightGlobals.ship_obtSpeed, cfg.ship_obtSpeedUnits));
 
             if (cfg.ship_srfSpeed)
-                WriteFile("ship_srfSpeed", FormatSpeed(ship_srfSpeed, cfg.ship_srfSpeedUnits));
+                WriteFile("ship_srfSpeed", FormatSpeed(FlightGlobals.ship_srfSpeed, cfg.ship_srfSpeedUnits));
 
             if (cfg.ship_verticalSpeed)
-                WriteFile("ship_verticalSpeed", FormatSpeed(ship_verticalSpeed, cfg.ship_verticalSpeedUnits));
+                WriteFile("ship_verticalSpeed", FormatSpeed(FlightGlobals.ship_verticalSpeed, cfg.ship_verticalSpeedUnits));
 
             if (cfg.verticalAcceleration)
             {
-                WriteFile("verticalAcceleration", verticalAcceleration.ToString(decimalPlaces));
+                WriteFile("verticalAcceleration", ((FlightGlobals.ship_verticalSpeed - instance.lastVerticalSpeed) / TimeWarp.fixedDeltaTime).ToString(decimalPlaces));
             }
             
             if (cfg.altitude)
-                WriteFile("altitude", FormatAltitude(altitude, cfg.altitudeUnits));
+                WriteFile("altitude", FormatAltitude(FlightGlobals.ActiveVessel.altitude, cfg.altitudeUnits));
 
             if (cfg.terrainAltitude)
-                WriteFile("terrainAltitude", FormatAltitude(terrainAltitude, cfg.terrainAltitudeUnits));
+                WriteFile("terrainAltitude", FormatAltitude(FlightGlobals.ActiveVessel.terrainAltitude, cfg.terrainAltitudeUnits));
             if (cfg.atmDensity)
-                WriteFile("atmDensity", atmDensity.ToString(decimalPlaces));
+                WriteFile("atmDensity", FlightGlobals.ActiveVessel.atmDensity.ToString(decimalPlaces));
             if (cfg.atmosphericTemperature)
-                WriteFile("atmosphericTemperature", atmosphericTemperature.ToString(decimalPlaces));
+                WriteFile("atmosphericTemperature", FlightGlobals.ActiveVessel.atmosphericTemperature.ToString(decimalPlaces));
 
             if (cfg.currentStage)
                 WriteFile("currentStage", currentStage.ToString(decimalPlaces));
             if (cfg.distanceToSun)
-                WriteFile("distanceToSun", distanceToSun.ToString(decimalPlaces));
+                WriteFile("distanceToSun", FlightGlobals.ActiveVessel.distanceToSun.ToString(decimalPlaces));
             if (cfg.geeForce)
-                WriteFile("geeForce", geeForce.ToString(decimalPlaces));
+                WriteFile("geeForce", FlightGlobals.ActiveVessel.geeForce.ToString(decimalPlaces));
             if (cfg.geeForce_immediate)
-                WriteFile("geeForce_immediate", geeForce_immediate.ToString(decimalPlaces));
+                WriteFile("geeForce_immediate", FlightGlobals.ActiveVessel.geeForce_immediate.ToString(decimalPlaces));
             if (cfg.heightFromSurface)
-                WriteFile("heightFromSurface", FormatAltitude(heightFromSurface, cfg.heightFromSurfaceUnits));
+                WriteFile("heightFromSurface", FormatAltitude(FlightGlobals.ActiveVessel.heightFromSurface, cfg.heightFromSurfaceUnits));
 
             if (cfg.heightFromTerrain)
                 WriteFile("heightFromTerrain", FormatAltitude(heightFromTerrain, cfg.heightFromTerrainUnits));
             if (cfg.horizontalSrfSpeed)
-                WriteFile("horizontalSrfSpeed", FormatSpeed(horizontalSrfSpeed, cfg.horizontalSrfSpeedUnits));
+                WriteFile("horizontalSrfSpeed", FormatSpeed(FlightGlobals.ActiveVessel.horizontalSrfSpeed, cfg.horizontalSrfSpeedUnits));
             if (cfg.horizontalAcceleration)
             {
-                WriteFile("horizontalAcceleration", horizontalAcceleration.ToString(decimalPlaces));
+                WriteFile("horizontalAcceleration", ((FlightGlobals.ActiveVessel.horizontalSrfSpeed - lastHorizontalSpeed) / TimeWarp.fixedDeltaTime).ToString(decimalPlaces));
             }
 
             if (cfg.indicatedAirSpeed)
-                WriteFile("indicatedAirSpeed", indicatedAirSpeed.ToString(decimalPlaces));
+                WriteFile("indicatedAirSpeed", FlightGlobals.ActiveVessel.indicatedAirSpeed.ToString(decimalPlaces));
             if (cfg.landedAt)
                 WriteFile("landedAt", landedAt);
             if (cfg.mach)
-                WriteFile("mach", mach.ToString(decimalPlaces));
+                WriteFile("mach", FlightGlobals.ActiveVessel.mach.ToString(decimalPlaces));
             if (cfg.missionTime)
-                WriteFile("missionTime", missionTime.ToString(decimalPlaces));
+                WriteFile("missionTime", FlightGlobals.ActiveVessel.missionTime.ToString(decimalPlaces));
             if (cfg.obt_speed)
-                WriteFile("obt_speed", FormatSpeed(obt_speed, cfg.ship_obtSpeedUnits));
+                WriteFile("obt_speed", FormatSpeed(FlightGlobals.ActiveVessel.obt_speed, cfg.ship_obtSpeedUnits));
 
             if (cfg.ApA)
-                WriteFile("ApA", FormatAltitude(ApA, cfg.ApA_Units));
+                WriteFile("ApA", FormatAltitude(FlightGlobals.ActiveVessel.orbit.ApA, cfg.ApA_Units));
             if (cfg.PeA)
-                WriteFile("PeA", FormatAltitude(PeA, cfg.PeA_Units));
+                WriteFile("PeA", FormatAltitude(FlightGlobals.ActiveVessel.orbit.PeA, cfg.PeA_Units));
 
 
             if (cfg.vesselName)
@@ -153,15 +145,15 @@ namespace KSPLogger
                 WriteFile("MIA", KDead.ToString());
 
             if (cfg.fixed_ship_obtSpeed)
-                WriteFile("fixed_ship_obtSpeed", FormatFixedSpeed(ship_obtSpeed, cfg.fixed_ship_obtSpeed_divisor, cfg.fixed_ship_obtSpeedUnits));
+                WriteFile("fixed_ship_obtSpeed", FormatFixedSpeed(FlightGlobals.ship_obtSpeed, cfg.fixed_ship_obtSpeed_divisor, cfg.fixed_ship_obtSpeedUnits));
             if (cfg.fixed_ship_srfSpeed)
-                WriteFile("fixed_ship_srfSpeed", FormatFixedSpeed(ship_srfSpeed, cfg.fixed_ship_srfSpeed_divisor, cfg.fixed_ship_srfSpeedUnits));
+                WriteFile("fixed_ship_srfSpeed", FormatFixedSpeed(FlightGlobals.ship_srfSpeed, cfg.fixed_ship_srfSpeed_divisor, cfg.fixed_ship_srfSpeedUnits));
             if (cfg.fixed_ship_verticalSpeed)
-                WriteFile("fixed_ship_verticalSpeed", FormatFixedSpeed(ship_verticalSpeed, cfg.fixed_ship_verticalSpeed_divisor, cfg.fixed_ship_verticalSpeedUnits));
+                WriteFile("fixed_ship_verticalSpeed", FormatFixedSpeed(FlightGlobals.ship_verticalSpeed, cfg.fixed_ship_verticalSpeed_divisor, cfg.fixed_ship_verticalSpeedUnits));
             if (cfg.fixed_altitude)
-                WriteFile("fixed_altitude", formatFixedAltitude(altitude, cfg.fixed_altitude_divisor, cfg.fixed_altitudeUnits));
+                WriteFile("fixed_altitude", formatFixedAltitude(FlightGlobals.ActiveVessel.altitude, cfg.fixed_altitude_divisor, cfg.fixed_altitudeUnits));
             if (cfg.fixed_terrainAltitude)
-                WriteFile("fixed_terrainAltitude", formatFixedAltitude(altitude, cfg.fixed_terrainAltitude_divisor, cfg.fixed_terrainAltitudeUnits));
+                WriteFile("fixed_terrainAltitude", formatFixedAltitude(FlightGlobals.ActiveVessel.altitude, cfg.fixed_terrainAltitude_divisor, cfg.fixed_terrainAltitudeUnits));
             if (cfg.inclination)
                 WriteFile("inclination", inclination.ToString("F1"));
             if (cfg.biome)

@@ -94,10 +94,17 @@
 	Updated for KSP 1.8
 
 0.6.0.1
-	Changed ROOT_PATH from a variable to a property to avoid calling a unity function outofframe
+	Changed ROOT_PATH from a variable to a property to avoid calling a unity function out-of-frame
 
 0.6.0.2
 	Version bump for CKAN
 
 0.6.0.3
 	Added some more descriptive text to the default config
+
+0.6.1
+	Changed threads to coroutines
+	Added AssemblyFileVersion
+	Updated version file for 1.12
+	Changed minimum refresh rate to 1 second
+	Eliminated extra step of copying data (was needed for threading)
