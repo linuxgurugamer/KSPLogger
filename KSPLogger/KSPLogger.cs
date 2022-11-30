@@ -88,24 +88,6 @@ namespace KSPLogger
             }
         }
 
-#if false
-        IEnumerator DoBackgroundJob()
-        {
-            int lastRunningCnt = 0;
-            while (true)
-            {
-                yield return new WaitForSeconds(cfg.refreshRate);
-                lastRunningCnt++;
-                if (lastRunningCnt > runningCnt + 10)
-                {
-                    Log.Error("ThreadFunc stopped, restarting");
-                    StopCoroutine("ThreadFunc");
-                    StartCoroutine("ThreadFunc");
-                }
-                runningCnt = lastRunningCnt;
-            }
-        }
-#endif
 
         IEnumerator CheckForUpdates()
         {
@@ -119,13 +101,8 @@ namespace KSPLogger
         }
 
 
-        IEnumerator UpdateOBSData()
+        void UpdateOBSData()
         {
-
-            while (!initted)
-            {
-                yield return null;
-            }
 
             lastVerticalSpeed = FlightGlobals.ship_verticalSpeed;
 
@@ -136,11 +113,10 @@ namespace KSPLogger
 
             lastHorizontalSpeed = FlightGlobals.ActiveVessel.horizontalSrfSpeed;
 
-
             landedAt = FlightGlobals.ActiveVessel.landedAt;
 
             vesselName = FlightGlobals.ActiveVessel.vesselName;
-
+            Log.Info("vesselName: " + FlightGlobals.ActiveVessel.vesselName);
 
             biome = CurrentBiome(FlightGlobals.ActiveVessel);
             inclination = FlightGlobals.ActiveVessel.orbit.inclination;
@@ -152,9 +128,6 @@ namespace KSPLogger
                 lastDcheckUpdate = Time.realtimeSinceStartup;
 
             }
-
-
-            yield return null;
         }
 
 

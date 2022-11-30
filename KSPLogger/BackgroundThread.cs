@@ -12,7 +12,7 @@ using KSP.Localization;
 
 namespace KSPLogger
 {
-    public partial  class KSPLogger
+    public partial class KSPLogger
     {
         internal static bool initted = false;
         internal static bool doExit = false;
@@ -31,7 +31,7 @@ namespace KSPLogger
 
         internal static string landedAt, vesselName;
         //static string decimalPlaces;
-        
+
         static string line = "";
         internal static string filenames = "";
 
@@ -44,7 +44,7 @@ namespace KSPLogger
 
         IEnumerator ThreadFunc()
         {
-            UpdateOBSData();
+            Log.Info("ThreadFunc");
             //cfg = KSPLogger.instance.cfg;
             decimalPlaces = "F" + cfg.decimalPlaces.ToString();
 
@@ -54,11 +54,12 @@ namespace KSPLogger
             {
                 yield return new WaitForSeconds(cfg.refreshRate);
 
+                UpdateOBSData();
                 WriteOBSData();
             }
         }
 
-#region WriteDataItems
+        #region WriteDataItems
         static void WriteOBSData()
         {
 
@@ -86,7 +87,7 @@ namespace KSPLogger
             {
                 WriteFile("verticalAcceleration", ((FlightGlobals.ship_verticalSpeed - instance.lastVerticalSpeed) / TimeWarp.fixedDeltaTime).ToString(decimalPlaces));
             }
-            
+
             if (cfg.altitude)
                 WriteFile("altitude", FormatAltitude(FlightGlobals.ActiveVessel.altitude, cfg.altitudeUnits));
 
@@ -161,7 +162,7 @@ namespace KSPLogger
 
 
             if (cfg.onePerFile == false)
-                 WriteLine();
+                WriteLine();
         }
         #endregion
 
@@ -228,9 +229,9 @@ namespace KSPLogger
 
             line = "";
         }
-#endregion
+        #endregion
 
-#region Formatters
+        #region Formatters
         static string FormatSpeed(double speed, bool units)
         {
             if (!units || !cfg.scaleMeters)

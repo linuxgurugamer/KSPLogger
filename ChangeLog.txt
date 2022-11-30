@@ -108,3 +108,6 @@
 	Updated version file for 1.12
 	Changed minimum refresh rate to 1 second
 	Eliminated extra step of copying data (was needed for threading)
+
+0.6.1.1
+	Fixed some values not getting updated for display
